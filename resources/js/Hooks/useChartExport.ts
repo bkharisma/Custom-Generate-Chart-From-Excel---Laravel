@@ -7,9 +7,10 @@ interface UseChartExportOptions {
     chartRef: React.RefObject<ReactEChartsCore | null>;
     title: string;
     dataTableRef?: React.RefObject<HTMLDivElement | null>;
+    showTable?: boolean;
 }
 
-export function useChartExport({ chartRef, title, dataTableRef }: UseChartExportOptions) {
+export function useChartExport({ chartRef, title, dataTableRef, showTable }: UseChartExportOptions) {
     const sanitiseFilename = (name: string) =>
         name.replace(/[^a-z0-9_-]/gi, '_').replace(/_+/g, '_') || 'chart';
 
@@ -45,16 +46,40 @@ export function useChartExport({ chartRef, title, dataTableRef }: UseChartExport
         const pdf = new jsPDF('p', 'mm', 'a4');
         pdf.addImage(imgData, 'PNG', 0, 10, imgWidth, imgHeight);
 
-        if (dataTableRef?.current) {
-            const tableCanvas = await html2canvas(dataTableRef.current, {
+        if (showTable && dataTableRef?.current) {
+            const tableEl = dataTableRef.current;
+            const scrollContainer = tableEl.querySelector<HTMLElement>('[class*="max-h-96"]');
+            let savedScrollStyle = '';
+            if (scrollContainer) {
+                savedScrollStyle = scrollContainer.style.cssText;
+                scrollContainer.style.maxHeight = 'none';
+                scrollContainer.style.overflow = 'visible';
+            }
+
+            const tableCanvas = await html2canvas(tableEl, {
                 backgroundColor: '#ffffff',
                 scale: 2,
             });
+
+            if (scrollContainer) {
+                scrollContainer.style.cssText = savedScrollStyle;
+            }
+
             const tableImgData = tableCanvas.toDataURL('image/png');
             const tableImgWidth = 190;
             const tableImgHeight =
                 (tableCanvas.height * tableImgWidth) / tableCanvas.width;
-            const tableY = 10 + imgHeight + 5;
+
+            const PAGE_HEIGHT = 297;
+            const BOTTOM_MARGIN = 10;
+            const MAX_Y = PAGE_HEIGHT - BOTTOM_MARGIN;
+            let tableY = 10 + imgHeight + 5;
+
+            if (tableY + tableImgHeight > MAX_Y) {
+                pdf.addPage();
+                tableY = 10;
+            }
+
             pdf.addImage(
                 tableImgData,
                 'PNG',
@@ -66,7 +91,7 @@ export function useChartExport({ chartRef, title, dataTableRef }: UseChartExport
         }
 
         pdf.save(`${sanitiseFilename(title)}.pdf`);
-    }, [chartRef, title, dataTableRef]);
+    }, [chartRef, title, dataTableRef, showTable]);
 
     return { exportJpg, exportPdf };
 }

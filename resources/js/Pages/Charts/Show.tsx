@@ -47,9 +47,10 @@ export default function Show({
 }>) {
     const chartRef = useRef<ReactEChartsCore>(null);
     const dataTableRef = useRef<HTMLDivElement>(null);
-    const { exportJpg, exportPdf } = useChartExport({ chartRef, title: chart.title, dataTableRef });
-    const [exportingPdf, setExportingPdf] = useState(false);
     const [showTable, setShowTable] = useState(false);
+    const { exportJpg, exportPdf } = useChartExport({ chartRef, title: chart.title, dataTableRef, showTable });
+    const [exportingPdf, setExportingPdf] = useState(false);
+    const [exportError, setExportError] = useState<string | null>(null);
     const [hiddenCategories, setHiddenCategories] = useState<Set<string>>(new Set());
 
     const toggleCategory = (cat: string) => {
@@ -132,8 +133,11 @@ export default function Show({
 
     const handleExportPdf = async () => {
         setExportingPdf(true);
+        setExportError(null);
         try {
             await exportPdf();
+        } catch (e) {
+            setExportError(e instanceof Error ? e.message : 'Failed to export PDF. Please try again.');
         } finally {
             setExportingPdf(false);
         }
@@ -214,6 +218,9 @@ export default function Show({
                                     Delete
                                 </DangerButton>
                             </div>
+                            {exportError && (
+                                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{exportError}</p>
+                            )}
                         </div>
 
                         <div className="p-6">
