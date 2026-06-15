@@ -43,7 +43,7 @@ export function useChartExport({ chartRef, title, dataTableRef, showTable }: Use
         const imgWidth = 210;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        const pdf = new jsPDF('p', 'mm', 'a4', { compress: true });
+        const pdf = new jsPDF('p', 'mm', 'a4', true);
         pdf.addImage(imgData, 'JPEG', 0, 10, imgWidth, imgHeight);
 
         if (showTable && dataTableRef?.current) {
@@ -65,7 +65,7 @@ export function useChartExport({ chartRef, title, dataTableRef, showTable }: Use
                 scrollContainer.style.cssText = savedScrollStyle;
             }
 
-            const tableImgData = tableCanvas.toDataURL('image/png');
+            const tableImgData = tableCanvas.toDataURL('image/jpeg', 0.8);
             const tableImgWidth = 190;
             const tableImgHeight =
                 (tableCanvas.height * tableImgWidth) / tableCanvas.width;
@@ -82,7 +82,7 @@ export function useChartExport({ chartRef, title, dataTableRef, showTable }: Use
 
             pdf.addImage(
                 tableImgData,
-                'PNG',
+                'JPEG',
                 10,
                 tableY,
                 tableImgWidth,
