@@ -116,7 +116,7 @@ export default function ChartConfigPanel({
                     Show All Labels
                 </label>
                 <select
-                    value={String(options.showAllLabels !== false)}
+                    value={String(options.showAllLabels === true)}
                     onChange={(e) =>
                         onChange({
                             ...options,

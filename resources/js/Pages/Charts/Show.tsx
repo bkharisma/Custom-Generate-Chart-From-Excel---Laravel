@@ -322,7 +322,6 @@ export default function Show({
                                     </table>
                                 </div>
                             </div>
-                        )}
 
                         <div className="border-t border-gray-200 p-4 dark:border-gray-700">
                             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">

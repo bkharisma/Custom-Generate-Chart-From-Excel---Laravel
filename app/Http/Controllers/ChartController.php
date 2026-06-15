@@ -210,7 +210,7 @@ class ChartController extends Controller
 
         $options = $chart->options ?? [];
         $yLabels = $options['y_labels'] ?? [];
-        $showAllLabels = ($options['show_all_labels'] ?? true) !== false;
+        $showAllLabels = ($options['showAllLabels'] ?? false) !== false;
         $yColNames = $yColumns->map(fn ($c) => ($yLabels[$c->id] ?? null) ?: $c->name)->toArray();
 
         $excludeRowDefs = [];
@@ -350,7 +350,7 @@ class ChartController extends Controller
     private function aggregateChartConfig(Chart $chart, $rows, $yColumns, $xCol, string $chartType, array $options, array $rawSeries, array $filters = []): array
     {
         $yLabels = $options['y_labels'] ?? [];
-        $showAllLabels = ($options['show_all_labels'] ?? true) !== false;
+        $showAllLabels = ($options['showAllLabels'] ?? false) !== false;
         $yColNames = $yColumns->map(fn ($c) => ($yLabels[$c->id] ?? null) ?: $c->name)->toArray();
         $echartsType = $chartType === 'bar_y' ? 'bar' : $chartType;
         $isAreaType = $echartsType === 'area';
