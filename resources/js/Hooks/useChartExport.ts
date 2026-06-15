@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import type ReactEChartsCore from 'echarts-for-react/esm/core';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 
 interface UseChartExportOptions {
     chartRef: React.RefObject<ReactEChartsCore | null>;
@@ -36,15 +36,15 @@ export function useChartExport({ chartRef, title, dataTableRef, showTable }: Use
 
         const canvas = await html2canvas(dom, {
             backgroundColor: '#ffffff',
-            scale: 2,
+            scale: 1.5,
         });
 
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/jpeg', 0.8);
         const imgWidth = 210;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        pdf.addImage(imgData, 'PNG', 0, 10, imgWidth, imgHeight);
+        const pdf = new jsPDF('p', 'mm', 'a4', { compress: true });
+        pdf.addImage(imgData, 'JPEG', 0, 10, imgWidth, imgHeight);
 
         if (showTable && dataTableRef?.current) {
             const tableEl = dataTableRef.current;
@@ -58,7 +58,7 @@ export function useChartExport({ chartRef, title, dataTableRef, showTable }: Use
 
             const tableCanvas = await html2canvas(tableEl, {
                 backgroundColor: '#ffffff',
-                scale: 2,
+                scale: 1.5,
             });
 
             if (scrollContainer) {
