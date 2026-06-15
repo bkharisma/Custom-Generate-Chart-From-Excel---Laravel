@@ -80,11 +80,27 @@ class ChartController extends Controller
             'exclude_rows' => ['nullable', 'array'],
             'exclude_rows.*.column_id' => ['required', 'integer', 'exists:sheet_columns,id'],
             'exclude_rows.*.value' => ['required', 'string'],
+            'options' => ['nullable', 'array'],
         ]);
 
         $sheet = Sheet::findOrFail($validated['sheet_id']);
         $project = $sheet->spreadsheet->project;
         Gate::authorize('view', $project);
+
+        $options = [
+            'filters' => $validated['filters'] ?? [],
+            'y_labels' => $validated['y_labels'] ?? [],
+            'excluded_categories' => $validated['excluded_categories'] ?? [],
+            'exclude_rows' => $validated['exclude_rows'] ?? [],
+        ];
+
+        if (! empty($validated['options'])) {
+            foreach ($validated['options'] as $key => $value) {
+                if (! in_array($key, ['filters', 'y_labels', 'excluded_categories', 'exclude_rows'])) {
+                    $options[$key] = $value;
+                }
+            }
+        }
 
         $chart = Chart::create([
             'project_id' => $project->id,
@@ -94,12 +110,7 @@ class ChartController extends Controller
             'chart_type' => $validated['chart_type'],
             'x_column_id' => $validated['x_column_id'],
             'y_columns' => $validated['y_columns'],
-            'options' => [
-                'filters' => $validated['filters'] ?? [],
-                'y_labels' => $validated['y_labels'] ?? [],
-                'excluded_categories' => $validated['excluded_categories'] ?? [],
-                'exclude_rows' => $validated['exclude_rows'] ?? [],
-            ],
+            'options' => $options,
         ]);
 
         return redirect()

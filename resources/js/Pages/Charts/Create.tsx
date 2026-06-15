@@ -2,6 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PrimaryButton from '@/Components/PrimaryButton';
 import InputError from '@/Components/InputError';
 import ColumnSelector from '@/Components/ColumnSelector';
+import ChartConfigPanel, { ChartOptions } from '@/Components/ChartConfigPanel';
 import { PageProps } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
@@ -39,6 +40,27 @@ interface ExcludeRow {
     value: string;
 }
 
+interface FormChartOptions {
+    theme?: string;
+    color?: string[];
+    title?: { text?: string; subtext?: string };
+    legend?: { show?: boolean; top?: string; bottom?: string };
+    showAllLabels?: boolean;
+}
+
+interface CreateForm {
+    title: string;
+    chart_type: string;
+    sheet_id: number | null;
+    x_column_id: number | null;
+    y_columns: number[];
+    filters: Filter[];
+    y_labels: Record<number, string>;
+    excluded_categories: string[];
+    exclude_rows: ExcludeRow[];
+    options: FormChartOptions;
+}
+
 export default function Create({
     chartTypes,
     selectedSheet,
@@ -50,16 +72,17 @@ export default function Create({
     columns: Column[];
     projects: ProjectItem[];
 }>) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<CreateForm>({
         title: selectedSheet ? `Chart - ${selectedSheet.name}` : '',
-        chart_type: 'bar' as string,
-        sheet_id: selectedSheet?.id ?? null as number | null,
-        x_column_id: null as number | null,
-        y_columns: [] as number[],
-        filters: [] as Filter[],
-        y_labels: {} as Record<number, string>,
-        excluded_categories: [] as string[],
-        exclude_rows: [] as ExcludeRow[],
+        chart_type: 'bar',
+        sheet_id: selectedSheet?.id ?? null,
+        x_column_id: null,
+        y_columns: [],
+        filters: [],
+        y_labels: {},
+        excluded_categories: [],
+        exclude_rows: [],
+        options: {},
     });
 
     const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
@@ -449,6 +472,22 @@ export default function Create({
                                     />
                                     <InputError message={errors.title} className="mt-2" />
                                 </div>
+
+                                {data.sheet_id && loadedColumns.length > 0 && (
+                                    <div>
+                                        <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
+                                            Customization
+                                        </h3>
+                                        <div className="mt-4 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                                            <ChartConfigPanel
+                                                options={data.options as ChartOptions}
+                                                onChange={(opts) =>
+                                                    setData('options', opts as FormChartOptions)
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="flex gap-3">
                                     <PrimaryButton
